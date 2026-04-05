@@ -15,7 +15,7 @@ self.addEventListener('fetch', event => {
   console.log('request:', url.pathname);
   if (url.pathname.includes('1.txt')) {
     event.respondWith(
-      fetch(`/geometrydashdotcom/levels/${levelID}.txt`)
+      fetch(`/geometrydashdotcom/assets/${levelID}.txt`)
     );
   }
 });
