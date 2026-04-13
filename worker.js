@@ -47,22 +47,26 @@ async function handleLevelRequest() {
   const res = await fetch(
     `https://getleveldata.lasokar.workers.dev?id=${levelID}`
   );
-  const text = await res.text();
-  if (text.trim() === "-1") {
+  
+  const data = await res.json();
+
+  if (data.error) {
     self.clients.matchAll().then((clients) => {
       for (const client of clients) {
-        client.postMessage({ type: "invalid-id" });
+        client.postMessage({ type: data.error === "rate-limit" ? "rate-limit" : "invalid-id" });
       }
     });
-    return;
+    return new Response("-1");
   }
-  if (text.trim() === "error code: 1015") {
-    self.clients.matchAll().then((clients) => {
-      for (const client of clients) {
-        client.postMessage({ type: "rate-limit" });
-      }
-    });
-    return;
-  }
-  return new Response(text);
+
+  self.clients.matchAll().then((clients) => {
+    for (const client of clients) {
+      client.postMessage({ 
+        type: "set-level-name", 
+        name: data["name"] 
+      });
+    }
+  });
+
+  return new Response(data["data"]);
 }
